@@ -2,8 +2,11 @@ import streamlit as st
 import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# from transformers import pipeline
+# pipe = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
+
 from transformers import pipeline
-pipe = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
+classifier = pipeline("text-classification", model="distilbert-base-uncased", device="cpu")  # Faster init
 import time
 from datetime import datetime
 
