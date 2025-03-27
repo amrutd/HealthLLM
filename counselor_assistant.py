@@ -1,14 +1,38 @@
 
 
-#################================================================================================================
-#working 
-#################================================================================================================
-
-
 import streamlit as st
+import torch
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 from transformers import pipeline
+pipe = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
 import time
 from datetime import datetime
+
+
+#########
+
+# import os
+# from fastapi import FastAPI
+# from fastapi.middleware.wsgi import WSGIMiddleware
+# from streamlit.web.server import Server
+
+# app = FastAPI()
+# app.mount("/", WSGIMiddleware(Server._get_app().wsgi_app))
+
+# @app.get("/health")
+# def health_check():
+#     return {"status": "healthy"}
+
+# if os.getenv("STREAMLIT_CLOUD"):
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8501)
+
+# @st.cache_resource(ttl=3600, max_entries=3)
+# def load_model():
+#  return pipeline('text-generation', model='gpt2')  # Use smaller models
+
+########## health check for server
 
 # 1. APP CONFIGURATION ================================================
 st.set_page_config(
@@ -29,7 +53,19 @@ st.markdown("""
   --bg_clr_g2: #d9ede3;
   --bg_clr_g3: #1b422e;
   --border_clr: #1b422e;
+
+
+  /* Dark Mode Overrides */
+  --dark-primary: #43a573;
+  --dark-secondary: #2d3748;
+  --dark-font: #e2e8f0;
+  --dark-bg: #1a202c;
+  --dark-bg2: #2d3748;
+  --dark-bg3: #38a169;
+  --dark-border: #4a5568;
  }
+
+
 
  * {
   box-sizing: border-box;
@@ -244,7 +280,7 @@ def main():
     )
     
     # Example cases for quick testing
-    with st.expander("💡 Example Cases"):
+    with st.expander("💡 Quick Start : Explore most commons challenges!! "):
         examples = {
           "Depression": "45yo male with treatment-resistant depression, expresses hopelessness about ever improving",
           "Anxiety": "College student experiencing panic attacks before exams despite knowing the material well",
@@ -261,7 +297,7 @@ def main():
     									'want to die', 'end my life', 'hurt myself', 'hurt someone','suicidal']
     
     # Response generation
-    if st.button("Get Clinical Suggestions", type="primary"):
+    if st.button("Analyze && Suggest", type="primary"):
         if not case_description.strip():
             st.warning("Please describe the clinical situation")
         else:
@@ -362,273 +398,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-##################================================================================================================
-##################================================================================================================
-
-
-
-
-
-
-##################================================================================================================
-#first 
-##################================================================================================================
-
-# import streamlit as st
-# from transformers import pipeline
-# import time
-# from datetime import datetime
-
-# # 1. APP CONFIGURATION ================================================
-# st.set_page_config(
-#     page_title="Counselor Guidance Assistant",
-#     page_icon="🧠",
-#     layout="centered",
-#     initial_sidebar_state="expanded"
-# )
-
-# # 2. CUSTOM STYLING ==================================================
-# st.markdown("""
-# <style>
-#     .stTextArea textarea {
-#         min-height: 200px;
-#         font-size: 16px;
-#     }
-#     .response-card {
-#         background-color: #f8f9fa;
-#         border-radius: 10px;
-#         padding: 1.5rem;
-#         margin: 1rem 0;
-#         border-left: 4px solid var(--primary_clr);
-#     }
-#     .stButton button {
-#         background-color: var(--primary_clr);
-#         color: white;
-#         transition: all 0.3s;
-#     }
-#     .stButton button:hover {
-#         opacity: 0.9;
-#         transform: translateY(-1px);
-#     }
-#     .crisis-alert {
-#         background-color: #ffdddd;
-#         border-left: 5px solid #ff0000;
-#         padding: 1rem;
-#         margin: 1rem 0;
-#     }
-# </style>
-# """, unsafe_allow_html=True)
-
-# # 3. MODEL LOADING ===================================================
-# @st.cache_resource(show_spinner=False)
-# def load_model():
-#     return pipeline("text2text-generation", model="google/flan-t5-base")
-
-# # 4. PROMPT ENGINEERING ==============================================
-# def generate_prompt(user_input, counseling_style):
-#     """Generate context-aware prompts for different counseling approaches"""
-#     style_prompts = {
-#         "CBT": (
-#             "As a CBT therapist, suggest techniques to address: '{input}'. "
-#             "Focus on identifying cognitive distortions and suggest behavioral experiments. "
-#             "Provide 2-3 concrete interventions."
-#         ),
-#         "Psychodynamic": (
-#             "From a psychodynamic perspective, analyze: '{input}'. "
-#             "Consider unconscious patterns and childhood influences. "
-#             "Suggest exploratory questions to reveal underlying conflicts."
-#         ),
-#         "Humanistic": (
-#             "Using humanistic approach, respond to: '{input}'. "
-#             "Focus on unconditional positive regard and self-actualization. "
-#             "Provide empathetic reflections and growth-oriented suggestions."
-#         ),
-#         "Solution-Focused": (
-#             "Using solution-focused therapy, address: '{input}'. "
-#             "Identify exceptions to the problem and small achievable steps. "
-#             "Suggest 2-3 scaling questions or miracle questions."
-#         )
-#     }
-#     return style_prompts[counseling_style].format(input=user_input)
-
-# # def get_references(approach):
-# #     """Return evidence-based references for each therapeutic approach"""
-# #     references = {
-# #         "CBT": "Beck, J. S. (2011). Cognitive Behavior Therapy: Basics and Beyond",
-# #         "Psychodynamic": "McWilliams, N. (2020). Psychoanalytic Diagnosis",
-# #         "Humanistic": "Rogers, C. (1951). Client-Centered Therapy",
-# #         "Solution-Focused": "De Shazer, S. (1988). Clues: Investigating Solutions in Brief Therapy"
-# #     }
-# #     return references.get(approach, "Evidence-Based Practice in Psychology")
-
-
-# def get_references(approach):
-#     """Return evidence-based references with clinical guidelines"""
-#     references = {
-#         "CBT": {
-#             "text": "Beck, J. S. (2011). Cognitive Behavior Therapy: Basics and Beyond",
-#             "guide": "https://www.apa.org/pubs/books/cognitive-behavior-therapy"
-#         },
-#         "Psychodynamic": {
-#             "text": "McWilliams, N. (2020). Psychoanalytic Diagnosis",
-#             "guide": "https://www.guilford.com/books/Psychoanalytic-Diagnosis/McWilliams/9781462543694"
-#         },
-#         # Add other approaches similarly
-#     }
-#     ref = references.get(approach, {
-#         "text": "Evidence-Based Practice in Psychology",
-#         "guide": "https://www.apa.org/practice/guidelines/evidence-based"
-#     })
-#     return f"{ref['text']} | [Clinical Guidelines]({ref['guide']})"
-
-# # 5. MAIN APPLICATION ================================================
-# def main():
-#     st.title("🧠 Counselor Guidance Assistant")
-#     st.markdown("""
-#     *Professional support for mental health practitioners*  
-#     Enter a patient scenario below for evidence-based intervention suggestions.
-#     """)
-    
-#     # Sidebar configuration
-#     with st.sidebar:
-#         st.title("Session Settings")
-#         counseling_style = st.selectbox(
-#             "Therapeutic Approach",
-#             ["CBT", "Psychodynamic", "Humanistic", "Solution-Focused"],
-#             index=0
-#         )
-#         creativity = st.slider("Response Creativity", 0.1, 1.0, 0.7)
-#         st.markdown("---")
-#         st.caption("""
-#         **Best Practices:**
-#         1. Describe specific behaviors/symptoms
-#         2. Include relevant history
-#         3. Note attempted interventions
-#         """)
-    
-#     # Main input area
-#     case_description = st.text_area(
-#         "Describe the clinical challenge:",
-#         placeholder="E.g., My 28yo patient with social anxiety avoids all group situations despite previous exposure work...",
-#         height=250
-#     )
-    
-#     # Example cases for quick testing
-#     with st.expander("💡 Example Cases"):
-#         examples = {
-#             "Depression": "45yo male with treatment-resistant depression, expresses hopelessness about ever improving",
-#             "Anxiety": "College student experiencing panic attacks before exams despite knowing the material well",
-#             "Relationship": "Couple stuck in pursue-withdraw pattern, escalating arguments about household responsibilities"
-#         }
-#         cols = st.columns(3)
-#         for i, (label, example) in enumerate(examples.items()):
-#             with cols[i]:
-#                 if st.button(label):
-#                     case_description = example
-
-# # Add this right before the "Response generation" section in your main() function
-# CRISIS_KEYWORDS = ['suicide', 'self-harm', 'homicide', 'abuse', 'kill myself', 
-# 'want to die', 'end my life', 'hurt myself', 'hurt someone']
-
-# # Response generation
-# if st.button("Get Clinical Suggestions", type="primary"):
-# 	if not case_description.strip():
-# 	    st.warning("Please describe the clinical situation")
-# 	else:
-# 	    # Crisis detection - add this block
-# 	    if any(keyword in case_description.lower() for keyword in CRISIS_KEYWORDS):
-# 	        st.error("""
-# 	        ⚠️ CRISIS ALERT - Immediate action required
-	        
-# 	        **Emergency Protocols:**
-# 	        1. Assess immediate safety risk
-# 	        2. Contact emergency services if imminent danger exists
-# 	        3. Do not leave the patient alone if risk is present
-	        
-# 	        **Emergency Resources:**
-# 	        - National Suicide Prevention Lifeline: 988
-# 	        - Crisis Text Line: Text HOME to 741741
-# 	        - Local emergency services: 911
-# 	        """)
-# 	        st.stop()  # Halt further processing
-	        
-# 	    with st.spinner("Generating evidence-based suggestions..."):
-# 	        # ... rest of your existing code ... 
-    
-#   	# Response generation
-#   if st.button("Get Clinical Suggestions", type="primary"):
-#       if not case_description.strip():
-#           st.warning("Please describe the clinical situation")
-#       else:
-#           with st.spinner("Generating evidence-based suggestions..."):
-#               try:
-#                   llm = load_model()
-#                   prompt = generate_prompt(case_description, counseling_style)
-                  
-#                   # Simulate processing steps for better UX
-#                   progress_bar = st.progress(0)
-#                   for percent in range(0, 101, 20):
-#                       time.sleep(0.1)
-#                       progress_bar.progress(percent)
-                  
-#                   response = llm(
-#                       prompt,
-#                       max_length=500,
-#                       do_sample=True,
-#                       temperature=creativity
-#                   )[0]['generated_text']
-                  
-#                   # Display formatted response
-#                   st.markdown("## Clinical Recommendations")
-#                   with st.container():
-#                       st.markdown(f'<div class="response-card">{response}</div>', 
-#                        unsafe_allow_html=True)
-                      
-#                       # Add references
-#                       st.markdown("---")
-#                       st.caption(f"**Reference:** {get_references(counseling_style)}")
-                      
-#                       # Response tools
-#                       st.download_button(
-#                         "Save Recommendations",
-#                         data=f"Approach: {counseling_style}\n\n{response}",
-#                         file_name=f"clinical_suggestions_{counseling_style}.txt"
-#                       )
-                  
-#               except Exception as e:
-#                   st.error(f"Error generating suggestions: {str(e)}")
-
-# if __name__ == "__main__":
-#     main()
-
-
-# #     if 'history' not in st.session_state:
-# #     st.session_state.history = []
-
-# # # Store each case and response
-# # st.session_state.history.append({
-# #     'case': case_description,
-# #     'recommendations': response,
-# #     'approach': counseling_style,
-# #     'timestamp': datetime.now()
-# # })
-
-# # CRISIS_KEYWORDS = ['suicide', 'self-harm', 'homicide', 'abuse']
-
-# # if any(keyword in case_description.lower() for keyword in CRISIS_KEYWORDS):
-# #     st.warning("⚠️ Immediate action required - detected crisis language")
-# #     st.markdown("""
-# #     **Emergency Resources:**
-# #     - National Suicide Prevention Lifeline: 988
-# #     - Crisis Text Line: Text HOME to 741741
-# #     """)
-
-# #     def get_references(approach):
-# #     references = {
-# #         "CBT": "Beck, J. S. (2011). Cognitive Behavior Therapy: Basics and Beyond",
-# #         "Psychodynamic": "McWilliams, N. (2020). Psychoanalytic Diagnosis",
-# #         # ... other approaches
-# #     }
-# #     return references.get(approach, "Evidence-Based Practice in Psychology")

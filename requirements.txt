@@ -1,0 +1,12 @@
+# requirements.txt - Dependencies
+
+streamlit>=1.22.0
+pyopenssl>=23.2.0  # Critical for HTTPS
+urllib3>=2.0.0  # Fixes connection issues
+python-dotenv
+transformers>=4.30.0
+torch>=2.0.1
+sentencepiece
+accelerate
+--extra-index-url https://download.pytorch.org/whl/cu118  #For GPU support
+
