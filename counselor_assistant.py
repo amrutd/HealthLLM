@@ -3,7 +3,7 @@ import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 from transformers import pipeline
-pipe = pipeline("text-classification", model="distilbert-base-uncased")  # 67MB vs BERT's 440MB
+# pipe = pipeline("text-classification", model="distilbert-base-uncased")  # 67MB vs BERT's 440MB
 
 classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
 
