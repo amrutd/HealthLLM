@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -73,7 +71,7 @@ st.markdown("""
 
  html,body {
   font-family: sans-serif;
-  line-height: 1.15;
+  line-height: 1.5;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   -ms-overflow-style: scrollbar;
@@ -96,7 +94,7 @@ st.markdown("""
   background-color: var(--bg_clr_g2);
  }
 
- .stTextArea textarea, .stTextArea > textarea {
+  .stTextArea textarea, .stTextArea > textarea {
   min-height: 250px;
   font-size: 16px;
   background-color: var(--bg_clr_g2);
@@ -142,10 +140,14 @@ st.markdown("""
  }*/
 
  
- 
  .progress-container {
   margin-top: -10px;
   margin-bottom: 15px;
+ }
+
+ summary[class*="st-emotion-cache-"]:hover{
+  font-weight:800;
+  color: var(--font_clr);
  }
  
  .crisis-alert {
@@ -179,7 +181,7 @@ def load_model():
 def generate_prompt(user_input, counseling_style):
     """Generate context-aware prompts for different counseling approaches"""
     style_prompts = {
-        "CBT": (
+        "Cognitive Behavior Therapy": (
             "As a CBT therapist, suggest techniques to address: '{input}'. "
             "Focus on identifying cognitive distortions and suggest behavioral experiments. "
             "Provide 2-3 concrete interventions."
@@ -205,7 +207,7 @@ def generate_prompt(user_input, counseling_style):
 def get_references(approach):
     """Return evidence-based references with clinical guidelines"""
     references = {
-        "CBT": {
+        "Cognitive Behavior Therapy": {
             "text": "Beck, J. S. (2011). Cognitive Behavior Therapy: Basics and Beyond",
             "guide": "https://www.apa.org/pubs/books/cognitive-behavior-therapy"
         },
@@ -237,6 +239,7 @@ def main():
     st.title("🧠 Counselor Guidance Assistant")
     st.markdown("""
     *Professional support for mental health practitioners*  
+
     Enter a patient scenario below for evidence-based intervention suggestions.
     """)
     
@@ -245,7 +248,7 @@ def main():
         st.title("Session Settings")
         counseling_style = st.selectbox(
             "Therapeutic Approach",
-            ["CBT", "Psychodynamic", "Humanistic", "Solution-Focused"],
+            ["Cognitive Behavior Therapy", "Psychodynamic", "Humanistic", "Solution-Focused"],
             index=0
         )
         creativity = st.slider("Response Creativity", 0.1, 1.0, 0.7)
@@ -270,15 +273,6 @@ def main():
                     if st.button(f"View Details #{len(st.session_state.history)-i}", key=f"view_{i}"):
                         st.session_state.current_session = session
         
-        
-    
-    # Main input area
-    case_description = st.text_area(
-        "Describe the clinical challenge:",
-        placeholder="E.g., My 28yo patient with social anxiety avoids all group situations despite previous exposure work...",
-        height=250
-    )
-    
     # Example cases for quick testing
     with st.expander("💡 Quick Start : Explore most commons challenges!! "):
         examples = {
@@ -289,12 +283,21 @@ def main():
         cols = st.columns(3)
         for i, (label, example) in enumerate(examples.items()):
           with cols[i]:
-	          if st.button(label):
-	              case_description = example
+           if st.button(label):
+               case_description = example    
+    
+    # Main input area
+    case_description = st.text_area(
+        "Type your challenge below:",
+        placeholder="My 28-year-old patient with social anxiety avoids all group situations despite previous exposure work...",
+        height=250
+    )
+    
+    
     
     # Crisis keywords detection
     CRISIS_KEYWORDS = ['suicide', 'self-harm', 'homicide', 'abuse', 'abused', 'kill myself', 'kill', 
-    									'want to die', 'end my life', 'hurt myself', 'hurt someone','suicidal']
+             'want to die', 'end my life', 'hurt myself', 'hurt someone','suicidal']
     
     # Response generation
     if st.button("Analyze && Suggest", type="primary"):
