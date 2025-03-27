@@ -55,7 +55,7 @@ tenacity==9.0.0
 threadpoolctl==3.6.0
 tokenizers==0.15.2
 toml==0.10.2
-torch==2.2.2
+torch==2.2.0 --index-url https://download.pytorch.org/whl/cpu
 tornado==6.4.2
 tqdm==4.67.1
 transformers==4.37.2
@@ -65,3 +65,4 @@ urllib3==2.3.0
 uvicorn==0.34.0
 watchdog==6.0.0
 xgboost==3.0.0
+onnxruntime==1.17.0

@@ -2,17 +2,22 @@ import streamlit as st
 import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# from transformers import pipeline
-# pipe = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
-
 from transformers import pipeline
-classifier = pipeline("text-classification", model="distilbert-base-uncased", device="cpu")  # Faster init
+pipe = pipeline("text-classification", model="distilbert-base-uncased")  # 67MB vs BERT's 440MB
+
 import time
 from datetime import datetime
 
 @st.cache_data
 def load_model():
     return pipeline("text-classification", model="distilbert-base-uncased")  # Cached after first run
+
+
+# from transformers import pipeline
+# pipe = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
+
+# from transformers import pipeline
+# classifier = pipeline("text-classification", model="distilbert-base-uncased", device="cpu")  # Faster init
 
 #########
 
