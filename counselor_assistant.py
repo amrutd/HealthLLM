@@ -5,7 +5,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 from transformers import pipeline
 # pipe = pipeline("text-classification", model="distilbert-base-uncased")  # 67MB vs BERT's 440MB
 
-classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
+classifier = pipeline("text-classification", model="distilbert-base-uncased", device="cpu")  # Faster init
+
+# pipe = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
+
+
+# classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
 
 import time
 from datetime import datetime
