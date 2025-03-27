@@ -10,6 +10,9 @@ classifier = pipeline("text-classification", model="distilbert-base-uncased", de
 import time
 from datetime import datetime
 
+@st.cache_data
+def load_model():
+    return pipeline("text-classification", model="distilbert-base-uncased")  # Cached after first run
 
 #########
 
@@ -179,6 +182,7 @@ st.markdown("""
 @st.cache_resource(show_spinner=False)
 def load_model():
     return pipeline("text2text-generation", model="google/flan-t5-base")
+
 
 # 4. PROMPT ENGINEERING ==============================================
 def generate_prompt(user_input, counseling_style):
