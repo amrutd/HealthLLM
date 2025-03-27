@@ -5,6 +5,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 from transformers import pipeline
 pipe = pipeline("text-classification", model="distilbert-base-uncased")  # 67MB vs BERT's 440MB
 
+classifier = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
+
 import time
 from datetime import datetime
 
@@ -244,172 +246,171 @@ def get_references(approach):
 
 # 5. MAIN APPLICATION ================================================
 def main():
-    # Initialize session history
-    if 'history' not in st.session_state:
-        st.session_state.history = []
-    
-    st.title("🧠 Counselor Guidance Assistant")
-    st.markdown("""
-    *Professional support for mental health practitioners*  
+ # Initialize session history
+ if 'history' not in st.session_state:
+     st.session_state.history = []
+ 
+ st.title("🧠 Counselor Guidance Assistant")
+ st.markdown("""
+ *Professional support for mental health practitioners*  
 
-    Enter a patient scenario below for evidence-based intervention suggestions.
-    """)
-    
-    # Sidebar configuration
-    with st.sidebar:
-        st.title("Session Settings")
-        counseling_style = st.selectbox(
-            "Therapeutic Approach",
-            ["Cognitive Behavior Therapy", "Psychodynamic", "Humanistic", "Solution-Focused"],
-            index=0
-        )
-        creativity = st.slider("Response Creativity", 0.1, 1.0, 0.7)
-        st.markdown("---")
-        
-        st.caption("""
-        **Best Practices:**
-        1. Describe specific behaviors/symptoms
-        2. Include relevant history
-        3. Note attempted interventions
+ Enter a patient scenario below for evidence-based intervention suggestions.
+ """)
+ 
+ # Sidebar configuration
+ with st.sidebar:
+  st.title("Session Settings")
+  counseling_style = st.selectbox(
+      "Therapeutic Approach",
+      ["Cognitive Behavior Therapy", "Psychodynamic", "Humanistic", "Solution-Focused"],
+      index=0
+  )
+  creativity = st.slider("Response Creativity", 0.1, 1.0, 0.7)
+  st.markdown("---")
+  
+  st.caption("""
+  **Best Practices:**
+  1. Describe specific behaviors/symptoms
+  2. Include relevant history
+  3. Note attempted interventions
+  """)
+
+  # Session history viewer
+  if st.session_state.history:
+   with st.expander("📚 Session History (Last 5)"):
+    for i, session in enumerate(st.session_state.history[-5:][::-1]):
+        st.markdown(f"""
+        **Session {len(st.session_state.history)-i}** ({session['timestamp']})
+        - Approach: {session['approach']}
+        - Case: {session['case']}
         """)
-
-        # Session history viewer
-        if st.session_state.history:
-            with st.expander("📚 Session History (Last 5)"):
-                for i, session in enumerate(st.session_state.history[-5:][::-1]):
-                    st.markdown(f"""
-                    **Session {len(st.session_state.history)-i}** ({session['timestamp']})
-                    - Approach: {session['approach']}
-                    - Case: {session['case']}
-                    """)
-                    if st.button(f"View Details #{len(st.session_state.history)-i}", key=f"view_{i}"):
-                        st.session_state.current_session = session
+        if st.button(f"View Details #{len(st.session_state.history)-i}", key=f"view_{i}"):
+            st.session_state.current_session = session
+     
+ # Example cases for quick testing
+ with st.expander("💡 Quick Start : Explore most commons challenges!! "):
+  examples = {
+    "Depression": "45yo male with treatment-resistant depression, expresses hopelessness about ever improving",
+    "Anxiety": "College student experiencing panic attacks before exams despite knowing the material well",
+    "Relationship": "Couple stuck in pursue-withdraw pattern, escalating arguments about household responsibilities"
+  }
+  cols = st.columns(3)
+  for i, (label, example) in enumerate(examples.items()):
+   with cols[i]:
+    if st.button(label):
+     case_description = example    
+ 
+ # Main input area
+ case_description = st.text_area(
+  "Type your challenge below:",
+  placeholder="My 28-year-old patient with social anxiety avoids all group situations despite previous exposure work...",
+  height=250
+ )
+ 
+ # Crisis keywords detection
+ CRISIS_KEYWORDS = ['suicide', 'self-harm', 'homicide', 'abuse', 'abused', 'kill myself', 'kill', 
+          'want to die', 'end my life', 'hurt myself', 'hurt someone','suicidal']
+ 
+ # Response generation
+ if st.button("Analyze && Suggest", type="primary"):
+  if not case_description.strip():
+   st.warning("Please describe the clinical situation")
+  else:
+   # Crisis detection
+   if any(keyword in case_description.lower() for keyword in CRISIS_KEYWORDS):
+    st.markdown("""
+    <div class="crisis-alert">
+        <div style="font-size: 1.3rem;">⚠️ <strong>CRISIS ALERT</strong> - Immediate Action Required</div>
+        <br>
+        <div><strong>Clinical Protocols:</strong></div>
+        <ol>
+            <li>Assess immediate safety risk using direct questioning</li>
+            <li>Implement safety planning if risk is present</li>
+            <li>Do not leave patient alone if active suicidal/homicidal ideation exists</li>
+        </ol>
+        <div><strong>Emergency Resources:</strong></div>
+        <ul>
+            <li>🇺🇸 <strong>988 Suicide & Crisis Lifeline</strong> (24/7)</li>
+            <li>📱 <strong>Crisis Text Line</strong>: Text HOME to 741741</li>
+            <li>🌎 <strong>International Association for Suicide Prevention</strong>: <a href="https://www.iasp.info/resources/Crisis_Centres/">Find Local Help</a></li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.expander("📋 Clinician Guidance (Click for Protocol Details)"):
+     st.markdown("""
+     **Standard Crisis Response Protocol:**
+     1. **Direct Assessment**  
+        "Are you having thoughts of ending your life?"  
+        "Do you have a plan?"  
+        "Have you ever attempted before?"
+     
+     2. **Safety Planning**  
+        - Remove access to means  
+        - Identify support contacts  
+        - Create step-by-step coping strategies
+     
+     3. **Documentation**  
+        - Risk assessment findings  
+        - Actions taken  
+        - Follow-up plan
+     """)
+    
+    # Log crisis event
+    st.session_state.history.append({
+        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M"),
+        'approach': "CRISIS INTERVENTION",
+        'case': "CRISIS DETECTED - " + case_description[:50] + "...",
+        'recommendations': "Session halted - emergency protocols activated"
+    })
+    st.stop()
+   
+   with st.spinner("Generating evidence-based suggestions..."):
+    try:
+        llm = load_model()
+        prompt = generate_prompt(case_description, counseling_style)
         
-    # Example cases for quick testing
-    with st.expander("💡 Quick Start : Explore most commons challenges!! "):
-        examples = {
-          "Depression": "45yo male with treatment-resistant depression, expresses hopelessness about ever improving",
-          "Anxiety": "College student experiencing panic attacks before exams despite knowing the material well",
-          "Relationship": "Couple stuck in pursue-withdraw pattern, escalating arguments about household responsibilities"
-        }
-        cols = st.columns(3)
-        for i, (label, example) in enumerate(examples.items()):
-          with cols[i]:
-           if st.button(label):
-               case_description = example    
-    
-    # Main input area
-    case_description = st.text_area(
-        "Type your challenge below:",
-        placeholder="My 28-year-old patient with social anxiety avoids all group situations despite previous exposure work...",
-        height=250
-    )
-    
-    
-    
-    # Crisis keywords detection
-    CRISIS_KEYWORDS = ['suicide', 'self-harm', 'homicide', 'abuse', 'abused', 'kill myself', 'kill', 
-             'want to die', 'end my life', 'hurt myself', 'hurt someone','suicidal']
-    
-    # Response generation
-    if st.button("Analyze && Suggest", type="primary"):
-        if not case_description.strip():
-            st.warning("Please describe the clinical situation")
-        else:
-            # Crisis detection
-            if any(keyword in case_description.lower() for keyword in CRISIS_KEYWORDS):
-                st.markdown("""
-                <div class="crisis-alert">
-                    <div style="font-size: 1.3rem;">⚠️ <strong>CRISIS ALERT</strong> - Immediate Action Required</div>
-                    <br>
-                    <div><strong>Clinical Protocols:</strong></div>
-                    <ol>
-                        <li>Assess immediate safety risk using direct questioning</li>
-                        <li>Implement safety planning if risk is present</li>
-                        <li>Do not leave patient alone if active suicidal/homicidal ideation exists</li>
-                    </ol>
-                    <div><strong>Emergency Resources:</strong></div>
-                    <ul>
-                        <li>🇺🇸 <strong>988 Suicide & Crisis Lifeline</strong> (24/7)</li>
-                        <li>📱 <strong>Crisis Text Line</strong>: Text HOME to 741741</li>
-                        <li>🌎 <strong>International Association for Suicide Prevention</strong>: <a href="https://www.iasp.info/resources/Crisis_Centres/">Find Local Help</a></li>
-                    </ul>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                with st.expander("📋 Clinician Guidance (Click for Protocol Details)"):
-                    st.markdown("""
-                    **Standard Crisis Response Protocol:**
-                    1. **Direct Assessment**  
-                       "Are you having thoughts of ending your life?"  
-                       "Do you have a plan?"  
-                       "Have you ever attempted before?"
-                    
-                    2. **Safety Planning**  
-                       - Remove access to means  
-                       - Identify support contacts  
-                       - Create step-by-step coping strategies
-                    
-                    3. **Documentation**  
-                       - Risk assessment findings  
-                       - Actions taken  
-                       - Follow-up plan
-                    """)
-                
-                # Log crisis event
-                st.session_state.history.append({
-                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    'approach': "CRISIS INTERVENTION",
-                    'case': "CRISIS DETECTED - " + case_description[:50] + "...",
-                    'recommendations': "Session halted - emergency protocols activated"
-                })
-                st.stop()
+        # Simulate processing steps for better UX
+        progress_bar = st.progress(0)
+        for percent in range(0, 101, 20):
+            time.sleep(0.1)
+            progress_bar.progress(percent)
+        
+        response = llm(
+            prompt,
+            max_length=500,
+            do_sample=True,
+            temperature=creativity
+        )[0]['generated_text']
+        
+        # Store session in history
+        st.session_state.history.append({
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M"),
+            'approach': counseling_style,
+            'case': case_description[:100] + "..." if len(case_description) > 100 else case_description,
+            'recommendations': response
+        })
+        
+        # Display formatted response
+        st.markdown("## Clinical Recommendations")
+        with st.container():
+            st.markdown(f'<div class="responseCard">{response}</div>', 
+                       unsafe_allow_html=True)
             
-            with st.spinner("Generating evidence-based suggestions..."):
-                try:
-                    llm = load_model()
-                    prompt = generate_prompt(case_description, counseling_style)
-                    
-                    # Simulate processing steps for better UX
-                    progress_bar = st.progress(0)
-                    for percent in range(0, 101, 20):
-                        time.sleep(0.1)
-                        progress_bar.progress(percent)
-                    
-                    response = llm(
-                        prompt,
-                        max_length=500,
-                        do_sample=True,
-                        temperature=creativity
-                    )[0]['generated_text']
-                    
-                    # Store session in history
-                    st.session_state.history.append({
-                        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                        'approach': counseling_style,
-                        'case': case_description[:100] + "..." if len(case_description) > 100 else case_description,
-                        'recommendations': response
-                    })
-                    
-                    # Display formatted response
-                    st.markdown("## Clinical Recommendations")
-                    with st.container():
-                        st.markdown(f'<div class="responseCard">{response}</div>', 
-                                   unsafe_allow_html=True)
-                        
-                        # Add references
-                        st.markdown("---")
-                        st.caption(f"**Reference:** {get_references(counseling_style)}")
-                        
-                        # Response tools
-                        st.download_button(
-                            "Save Recommendations",
-                            data=f"Approach: {counseling_style}\n\n{response}",
-                            file_name=f"clinical_suggestions_{counseling_style}.txt"
-                        )
-                    
-                except Exception as e:
-                    st.error(f"Error generating suggestions: {str(e)}")
+            # Add references
+            st.markdown("---")
+            st.caption(f"**Reference:** {get_references(counseling_style)}")
+            
+            # Response tools
+            st.download_button(
+                "Save Recommendations",
+                data=f"Approach: {counseling_style}\n\n{response}",
+                file_name=f"clinical_suggestions_{counseling_style}.txt"
+            )
+        
+    except Exception as e:
+        st.error(f"Error generating suggestions: {str(e)}")
 
 if __name__ == "__main__":
     main()
+
