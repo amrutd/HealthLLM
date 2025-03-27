@@ -1,4 +1,6 @@
-accelerate==1.5.2
+streamlit==1.29.0
+transformers==4.36.0
+torch==2.2.0accelerate==1.5.2
 altair==5.5.0
 annotated-types==0.7.0
 anyio==4.9.0
@@ -66,3 +68,6 @@ uvicorn==0.34.0
 watchdog==6.0.0
 xgboost==3.0.0
 
+streamlit==1.29.0
+transformers==4.36.0
+torch==2.2.0
